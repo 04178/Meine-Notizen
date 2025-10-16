@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Meine Notizen</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+
+    <!-- Kopfbereich -->
+    <header class="header">
+      <h1>📝 Meine Notizen</h1>
+      <a class="btn-link" href="{{ url_for('neu') }}">+ Neue Notiz</a>
+    </header>
+
+    <!-- Flash-Nachrichten -->
+    {% with meldungen = get_flashed_messages() %}
+      {% if meldungen %}
+        <ul class="flashlist">
+          {% for m in meldungen %}
+            <li>{{ m }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Suchfeld -->
+    <form class="search" method="get" action="{{ url_for('startseite') }}">
+      <input type="text" name="q" value="{{ q|default('') }}" placeholder="Suchen (Titel oder Text)">
+      <button class="btn" type="submit">Suchen</button>
+      {% if q %}
+        <a class="btn-link" href="{{ url_for('startseite') }}">Zurücksetzen</a>
+      {% endif %}
+    </form>
+
+    <!-- Notizenbereich -->
+    <section class="notes-wrapper">
+      {% if notes %}
+        <ul class="notes">
+          {% for n in notes %}
+            <li class="note">
+              <strong class="note-title">{{ n.titel }}</strong>
+
+              {% if n.created or n.updated %}
+              <div class="meta">
+                {% if n.created %}Erstellt: {{ n.created.strftime('%d.%m.%Y %H:%M') }}{% endif %}
+                {% if n.updated %} • Geändert: {{ n.updated.strftime('%d.%m.%Y %H:%M') }}{% endif %}
+              </div>
+              {% endif %}
+
+              <p class="note-text">{{ n.text | replace('\n', '<br>') | safe }}</p>
+
+              <div class="actions">
+                <a class="btn-link" href="{{ url_for('edit', id=n.id) }}">Bearbeiten</a>
+                <form method="post"
+                      action="{{ url_for('loeschen', id=n.id) }}"
+                      onsubmit="return confirm('Diese Notiz wirklich löschen?');">
+                  <button class="btn danger" type="submit">Löschen</button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">Noch keine Notizen. Erstelle die erste!</p>
+      {% endif %}
+    </section>
+
+  </div>
+</body>
+</html>
